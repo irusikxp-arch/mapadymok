@@ -3330,7 +3330,7 @@ add(wrap,emptyCta);
 Ctx.updateEmpty=function(){
 var count=engine.visible.filter(function(n){return n.id!=='root';}).length;
 if(count>0){emptyCta.style.display='none';return;}
-emptyCta.style.display='flex';
+emptyCta.style.display='none';return;
 if(role==='guest'&&P2P.status!=='on'){
 fill(emptyCta,el('div',{class:'card'},
 el('div',{class:'big'},'🔌'),
