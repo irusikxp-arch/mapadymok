@@ -88,16 +88,18 @@ h1,h2,h3{font-family:var(--font-d)}
 [data-theme="light"] .ballot-chip{color:#92400E;border-color:rgba(146,64,14,.35)}
 #add-top{flex-shrink:0}
 .phasebar{display:flex;align-items:center;gap:7px;padding:7px 14px;border-bottom:1px solid var(--line);background:var(--bg2);overflow-x:auto;min-height:44px;flex-shrink:0}
+.phasebar .chip,.phasebar .phase-chip{flex-shrink:0}
 .phase-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;font-size:12.5px;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--muted);transition:all .2s;white-space:nowrap}
 .phase-chip.active{color:#fff;background:linear-gradient(135deg,var(--dom),var(--mag));border-color:transparent;box-shadow:0 4px 14px rgba(108,77,246,.4)}
 .phase-chip.clickable:hover{transform:translateY(-1px);border-color:var(--dom2);color:var(--text)}
+.mod-chip.clickable:hover{transform:translateY(-1px);border-color:var(--dom2)}
 .timer-chip{margin-left:auto}
 .timer-chip svg.ring{width:22px;height:22px;transform:rotate(-90deg)}
 .timer-chip .tr{stroke:var(--line);fill:none;stroke-width:3}
 .timer-chip .tp{stroke:var(--cyan);fill:none;stroke-width:3;stroke-linecap:round;transition:stroke-dashoffset .5s linear}
 .hintbar{display:flex;align-items:center;gap:10px;padding:6px 14px;font-size:12.5px;background:linear-gradient(90deg,rgba(34,211,238,.1),rgba(108,77,246,.1));border-bottom:1px solid var(--line);flex-shrink:0;color:var(--text)}
 .hintbar b{color:var(--accent-text)}
-.hintbar .steps{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.hintbar .steps{display:flex;gap:14px;flex-wrap:wrap;align-items:center;min-width:0}
 .demo-banner{display:flex;align-items:center;gap:10px;padding:6px 14px;font-size:12.5px;background:linear-gradient(90deg,rgba(255,176,32,.14),rgba(244,63,142,.1));border-bottom:1px solid rgba(255,176,32,.3);flex-shrink:0}
 .room-main{flex:1;display:flex;min-height:0;position:relative}
 .stage{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0}
@@ -343,14 +345,32 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;bac
 .react-row button{padding:5px 9px;border-radius:99px;border:1px solid var(--line);background:var(--bg2);font-size:13px}
 .react-row button.sel{border-color:var(--cyan);background:rgba(34,211,238,.14)}
 .fatal{margin:auto;max-width:520px;padding:26px;text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center}
+@media (max-width:1100px){
+.topbar .logo{display:none}
+.topbar .title{max-width:24vw}
+}
+@media (max-width:900px){
+.topbar .avatars{display:none}
+#add-top .btn-label{display:none}
+#add-top{padding:0 12px}
+.side{width:300px}
+}
 @media (max-width:760px){
 .topbar{padding:8px 10px;gap:6px;min-height:54px}
-.topbar .title{font-size:13.5px;max-width:30vw}
+.topbar .title{font-size:13px;max-width:26vw}
+.topbar .icon-btn{width:36px;height:36px;min-width:36px;font-size:16px}
+#add-top{min-height:36px;padding:0 11px}
 .hide-m{display:none!important}
-#add-top{padding:0 12px}
-#add-top .btn-label{display:none}
-.phasebar{padding:6px 10px;min-height:42px}
-.hintbar .steps{gap:8px}
+.ballot-chip{display:none!important}
+.st-chip{padding:4px 8px;font-size:11.5px;max-width:110px;overflow:hidden;text-overflow:ellipsis}
+.phasebar{padding:6px 10px;min-height:42px;gap:6px}
+.phase-chip{padding:5px 9px;font-size:11.5px}
+.phasebar .chip{font-size:11.5px;padding:4px 9px}
+.hintbar{padding:5px 10px}
+.hintbar .steps{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+.hintbar .steps::-webkit-scrollbar{display:none}
+.hintbar .steps span{white-space:nowrap}
+.hintbar .btn{flex-shrink:0}
 .room-main{padding-bottom:56px}
 .room.present .room-main{padding-bottom:0}
 .sel-pill{display:none!important}
@@ -373,6 +393,13 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;bac
 .composer-grid{grid-template-columns:1fr}
 .composer-preview{position:static;order:-1}
 .composer-preview svg{height:120px}
+.fmt-row{gap:5px}
+.fmt-card b{font-size:10px}
+}
+@supports (height:100dvh){
+#app{height:100dvh}
+.modal{max-height:88dvh}
+.modal-wrap.sheet .modal{max-height:80dvh}
 }
 @media (prefers-reduced-motion:reduce){
 *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
@@ -824,7 +851,9 @@ var changed=false;
 Object.keys(src.nodes).forEach(function(id){
 var n=src.nodes[id],d=dst.nodes[id];
 if(!d){dst.nodes[id]=n;changed=true;}
+else if(id==='root'){if((n.lam||0)>(d.lam||0)){dst.nodes[id]=n;changed=true;}}
 else if(cmpRec(n,d)>0){dst.nodes[id]=n;changed=true;}
+else if(cmpRec(n,d)===0&&!d.img&&n.img){d.img=n.img;changed=true;}
 });
 Object.keys(src.ballots||{}).forEach(function(vid){
 var b=src.ballots[vid],d=dst.ballots[vid];
@@ -1168,7 +1197,7 @@ d.animate([{transform:'translate(0,0) scale(.7) rotate(0deg)',opacity:1},
 {duration:640,easing:'cubic-bezier(.3,.7,.4,1)'}).onfinish=function(){d.remove();};
 }catch(e){d.remove();}
 }
-/* ===== bus / p2p ===== */
+/* ===== bus (вкладки) ===== */
 function Bus(id,onmsg){
 this.tab=uid();this.bc=null;
 try{
@@ -1180,68 +1209,233 @@ this.bc.onmessage=function(e){if(e.data&&e.data.tab!==this.tab)onmsg(e.data);}.b
 }
 Bus.prototype.post=function(m){m.tab=this.tab;try{if(this.bc)this.bc.postMessage(m);}catch(e){}};
 Bus.prototype.close=function(){try{if(this.bc)this.bc.close();}catch(e){}this.bc=null;};
-var P2P={
-status:'off',roomId:null,room:null,send:null,peers:new Map(),hb:null,
-URLS:['https://cdn.jsdelivr.net/npm/trystero@0.21/nostr/+esm','https://esm.run/trystero@0.21/nostr','https://fastly.jsdelivr.net/npm/trystero@0.21/nostr/+esm'],
-attach:async function(roomId,handlers){
-if(this.roomId===roomId&&(this.status==='on'||this.status==='connecting'))return;
-this.detach();
-this.roomId=roomId;this.status='connecting';handlers.onStatus();
-var deadline=Date.now()+8000,mod=null;
-for(var i=0;i<this.URLS.length;i++){
-var left=deadline-Date.now();
-if(left<=200)break;
-try{
-mod=await Promise.race([import(this.URLS[i]),new Promise(function(_,rej){setTimeout(function(){rej(new Error('timeout'));},left);})]);
-if(mod&&typeof mod.joinRoom==='function')break;
-mod=null;
-}catch(e){mod=null;}
+/* ===== онлайн-синхронізація (MQTT over WebSocket) =====
+Працює з телефону, планшета й комп’ютера через інтернет — без WebRTC,
+тож шкільні мережі та мобільний інтернет не блокують з’єднання.
+Три резервні брокери; стан кімнати зберігається на брокері (retained),
+тому учень бачить дошку одразу після відкриття посилання. */
+var MQTT_URLS=[
+'https://cdn.jsdelivr.net/npm/mqtt@5.10.4/dist/mqtt.min.js',
+'https://unpkg.com/mqtt@5.10.4/dist/mqtt.min.js'
+];
+var BROKERS=[
+'wss://broker.emqx.io:8084/mqtt',
+'wss://broker.hivemq.com:8884/mqtt',
+'wss://test.mosquitto.org:8081/mqtt'
+];
+var mqttLibPromise=null;
+function loadMqtt(){
+if(window.mqtt)return Promise.resolve(window.mqtt);
+if(mqttLibPromise)return mqttLibPromise;
+mqttLibPromise=new Promise(function(res,rej){
+var i=0;
+function next(){
+if(window.mqtt){res(window.mqtt);return;}
+if(i>=MQTT_URLS.length){mqttLibPromise=null;rej(new Error('mqtt load'));return;}
+var s=document.createElement('script');s.src=MQTT_URLS[i++];
+var done=false;
+var t=setTimeout(function(){if(done)return;done=true;s.remove();next();},9000);
+s.onload=function(){if(done)return;done=true;clearTimeout(t);if(window.mqtt)res(window.mqtt);else next();};
+s.onerror=function(){if(done)return;done=true;clearTimeout(t);s.remove();next();};
+document.head.append(s);
 }
-if(this.roomId!==roomId)return;
-if(!mod){this.status='error';handlers.onStatus();return;}
-try{
-var r=mod.joinRoom({appId:'mindmap-ua-class-v1'},'mm-'+roomId);
-this.room=r;
-var st=r.makeAction('state'),hi=r.makeAction('hi'),cu=r.makeAction('cur');
-var sState=st[0],oState=st[1],sHi=hi[0],oHi=hi[1],sCur=cu[0],oCur=cu[1];
-this.send={state:sState,hi:sHi,cur:sCur};
-var self=this;
-r.onPeerJoin(function(pid){
-self.peers.set(pid,{last:Date.now()});
-try{sState(handlers.getRoom(),pid);sHi(handlers.getMe(),pid);}catch(e){}
-handlers.onStatus();
+next();
 });
-r.onPeerLeave(function(pid){
-self.peers.delete(pid);
-if(handlers.onCursorGone)handlers.onCursorGone('p2p:'+pid);
-handlers.onStatus();
-});
-oState(function(data,pid){self.touch(pid);try{handlers.onState(data);}catch(e){}});
-oHi(function(u,pid){self.touch(pid);try{handlers.onHi('p2p:'+pid,u);}catch(e){}});
-oCur(function(c,pid){self.touch(pid);try{handlers.onCursor('p2p:'+pid,c);}catch(e){}});
-this.status='on';
-try{sHi(handlers.getMe());}catch(e){}
-this.hb=setInterval(function(){
-try{sHi(handlers.getMe());}catch(e){}
-var now=Date.now();
-self.peers.forEach(function(p,pid){if(now-p.last>12000)self.peers.delete(pid);});
-handlers.onStatus();
-},3000);
-handlers.onStatus();
-}catch(e){this.status='error';handlers.onStatus();}
+return mqttLibPromise;
+}
+var P2P={
+status:'off',roomId:null,client:null,handlers:null,meId:uid().replace(/-/g,''),
+peers:new Map(),buffers:{},served:{},hostSeen:0,brokerIdx:0,tried:0,
+hiTimer:null,pruneTimer:null,dead:true,topic:null,lastKeep:0,lib:null,
+attach:async function(roomId,handlers){
+if(this.roomId===roomId&&!this.dead&&(this.status==='on'||this.status==='connecting')){this.handlers=handlers;return;}
+this.detach();
+this.roomId=roomId;this.handlers=handlers;this.dead=false;
+this.status='connecting';handlers.onStatus();
+var lib=null;
+try{lib=await loadMqtt();}catch(e){}
+if(this.dead||this.roomId!==roomId)return;
+if(!lib){this.status='error';handlers.onStatus();return;}
+this.lib=lib;this.topic='mmua1/'+roomId;this.tried=0;
+this.connect(0);
 },
-touch:function(pid){var p=this.peers.get(pid);if(p)p.last=Date.now();else this.peers.set(pid,{last:Date.now()});},
-sendState:function(room){if(this.status==='on'&&this.send){try{this.send.state(room);}catch(e){}}},
-sendHi:function(me){if(this.status==='on'&&this.send){try{this.send.hi(me);}catch(e){}}},
-sendCur:function(c){if(this.status==='on'&&this.send){try{this.send.cur(c);}catch(e){}}},
+connect:function(idx){
+if(this.dead||!this.lib)return;
+var self=this;
+this.brokerIdx=idx%BROKERS.length;
+var c=null;
+try{
+c=this.lib.connect(BROKERS[this.brokerIdx],{
+clientId:'mm_'+this.meId.slice(0,16),clean:true,connectTimeout:9000,
+reconnectPeriod:3000,keepalive:30,protocolVersion:4});
+}catch(e){this.fail();return;}
+this.client=c;
+var everUp=false;
+var failT=setTimeout(function(){
+if(everUp||self.dead||self.client!==c)return;
+try{c.end(true);}catch(e){}
+self.fail();
+},12000);
+c.on('connect',function(){
+if(self.dead||self.client!==c)return;
+everUp=true;clearTimeout(failT);self.tried=0;
+self.status='on';
+try{c.subscribe(self.topic+'/#',{qos:0});}catch(e){}
+var me=self.handlers&&self.handlers.getMe();
+if(me)self.pub({t:'hi',u:me,role:me.role});
+self.pub({t:'need'});
+if(self.handlers)self.handlers.onStatus();
+});
+c.on('message',function(topic,payload){
+if(self.dead||self.client!==c)return;
+try{self.onMsg(JSON.parse(payload.toString()));}catch(e){}
+});
+c.on('close',function(){
+if(self.dead||self.client!==c)return;
+if(self.status==='on'){self.status='connecting';if(self.handlers)self.handlers.onStatus();}
+});
+c.on('offline',function(){
+if(self.dead||self.client!==c)return;
+if(self.status==='on'){self.status='connecting';if(self.handlers)self.handlers.onStatus();}
+});
+c.on('error',function(){
+if(self.dead||self.client!==c||everUp)return;
+clearTimeout(failT);
+try{c.end(true);}catch(e){}
+self.fail();
+});
+},
+fail:function(){
+if(this.dead)return;
+this.client=null;this.tried++;
+this.status=this.tried>=BROKERS.length?'error':'connecting';
+if(this.tried>=BROKERS.length)this.tried=0;
+if(this.handlers)this.handlers.onStatus();
+var self=this;
+setTimeout(function(){if(!self.dead&&!self.client)self.connect(self.brokerIdx+1);},800);
+},
+pub:function(obj){
+if(this.dead||this.status!=='on'||!this.client)return;
+obj.from=this.meId;
+try{this.client.publish(this.topic+'/m',JSON.stringify(obj),{qos:0});}catch(e){}
+},
+sendSnap:function(to,room){
+if(this.dead||this.status!=='on'||!this.client)return;
+var str;
+try{str=JSON.stringify(room);}catch(e){return;}
+if(str.length>6000000)return;
+var mid=uid().slice(0,8),CH=58000,n=Math.ceil(str.length/CH),self=this;
+for(var i=0;i<n;i++){
+(function(i){
+setTimeout(function(){
+if(self.dead||self.status!=='on')return;
+self.pub({t:'snap',to:to,mid:mid,i:i,n:n,d:str.slice(i*CH,(i+1)*CH)});
+},i*30);
+})(i);
+}
+},
+publishKeep:function(){
+if(this.dead||this.status!=='on'||!this.client||!this.handlers)return;
+var me=this.handlers.getMe();
+if(!me||me.role!=='host')return;
+var now=Date.now();
+if(now-this.lastKeep<5000)return;
+this.lastKeep=now;
+var light=clone(this.handlers.getRoom());
+Object.keys(light.nodes).forEach(function(k){light.nodes[k].img='';});
+var str=JSON.stringify(light);
+if(str.length>58000)return;
+try{
+this.client.publish(this.topic+'/keep',
+JSON.stringify({from:this.meId,t:'snap',to:'*',mid:'keep',i:0,n:1,d:str}),
+{qos:0,retain:true});
+}catch(e){}
+},
+onMsg:function(m){
+if(!m||m.from===this.meId||!this.handlers)return;
+var now=Date.now();
+if(m.t==='hi'&&m.u){
+this.peers.set(m.from,{last:now,u:m.u});
+if(m.role==='host')this.hostSeen=now;
+this.handlers.onHi('net:'+m.from,m.u);
+this.handlers.onStatus();
+}else if(m.t==='bye'){
+this.peers.delete(m.from);
+if(this.handlers.onCursorGone)this.handlers.onCursorGone('net:'+m.from);
+this.handlers.onStatus();
+}else if(m.t==='cur'){
+this.handlers.onCursor('net:'+m.from,m);
+}else if(m.t==='need'){
+var me=this.handlers.getMe(),self=this;
+if(me&&me.role==='host'){
+setTimeout(function(){if(!self.dead)self.sendSnap(m.from,self.handlers.getRoom());},150);
+}else if(now-this.hostSeen>9000){
+setTimeout(function(){
+if(self.dead)return;
+if(self.served[m.from]&&now-self.served[m.from]<15000)return;
+self.sendSnap(m.from,self.handlers.getRoom());
+},700+Math.random()*1500);
+}
+}else if(m.t==='snap'){
+if(m.to!=='*')this.served[m.to]=now;
+if(m.to!=='*'&&m.to!==this.meId)return;
+var b=this.buffers[m.mid];
+if(!b){b=this.buffers[m.mid]={n:m.n,parts:new Array(m.n),got:0,ts:now};}
+if(!b.parts[m.i]){b.parts[m.i]=m.d;b.got++;}
+if(b.got>=b.n){
+delete this.buffers[m.mid];
+try{this.handlers.onState(JSON.parse(b.parts.join('')));}catch(e){}
+}
+}
+},
+startTimers:function(){
+var self=this;
+if(this.hiTimer)return;
+this.hiTimer=setInterval(function(){
+if(self.dead||!self.handlers)return;
+var me=self.handlers.getMe();
+if(me)self.pub({t:'hi',u:me,role:me.role});
+self.publishKeep();
+},4000);
+this.pruneTimer=setInterval(function(){
+if(self.dead)return;
+var now=Date.now(),changed=false;
+self.peers.forEach(function(p,id){
+if(now-p.last>12000){
+self.peers.delete(id);changed=true;
+if(self.handlers&&self.handlers.onCursorGone)self.handlers.onCursorGone('net:'+id);
+}
+});
+Object.keys(self.buffers).forEach(function(k){
+if(now-self.buffers[k].ts>30000)delete self.buffers[k];
+});
+if(changed&&self.handlers)self.handlers.onStatus();
+},4000);
+},
+sendState:function(room){
+if(this.status!=='on')return;
+this.sendSnap('*',room);
+this.publishKeep();
+},
+sendHi:function(me){if(this.status==='on')this.pub({t:'hi',u:me,role:me.role});},
+sendCur:function(c){if(this.status==='on')this.pub({t:'cur',x:c.x,y:c.y,u:c.u});},
 count:function(){return this.peers.size;},
+brokerName:function(){try{return new URL(BROKERS[this.brokerIdx]).hostname;}catch(e){return BROKERS[this.brokerIdx];}},
 detach:function(){
-if(this.hb){clearInterval(this.hb);this.hb=null;}
-try{if(this.room)this.room.leave();}catch(e){}
-this.room=null;this.send=null;this.peers.clear();this.status='off';this.roomId=null;
+this.dead=true;
+if(this.hiTimer){clearInterval(this.hiTimer);this.hiTimer=null;}
+if(this.pruneTimer){clearInterval(this.pruneTimer);this.pruneTimer=null;}
+if(this.client){
+try{this.publishKeep();}catch(e){}
+try{this.pub({t:'bye'});}catch(e){}
+try{this.client.end(true);}catch(e){}
+}
+this.client=null;this.peers.clear();this.buffers={};this.served={};
+this.status='off';this.roomId=null;this.hostSeen=0;this.lastKeep=0;
 }
 };
-var p2pSendState=throttle(function(room){P2P.sendState(room);},300);
+P2P.startTimers();
+var p2pSendState=throttle(function(room){P2P.sendState(room);},400);
 /* ===== context / actions ===== */
 var Ctx=null;
 var View={key:null,resize:null,storage:null,cleanup:null};
@@ -1406,7 +1600,7 @@ ts:Date.now(),lam:++Ctx.room.clock,del:false,status:status,pin:false,_fresh:true
 if(o.pos){n.x=o.pos.x;n.y=o.pos.y;n.fixed=true;}
 Ctx.room.nodes[id]=n;
 if(hit&&Ctx.role!=='host')toast('Ідея містить небажану лексику — вона пішла на перевірку ведучому',{icon:'🛡️'});
-else if(status==='pending')toast('Ідея надійшла в чергу модерації ⏳',{icon:'⏳'});
+else if(status==='pending')toast('Ідея надійшла на перевірку вчителю ⏳',{icon:'⏳'});
 pushUndo({label:'Додавання думки',
 undo:function(){patchNode(id,{del:true},{undoable:false});},
 redo:function(){patchNode(id,{del:false},{undoable:false});}});
@@ -1712,7 +1906,10 @@ getMe:function(){return Ctx.me;},
 onState:onP2PState,
 onHi:function(key,u){if(Ctx&&Ctx.presence){Ctx.presence.set(key,{u:u,last:Date.now()});if(Ctx.updateHeader)Ctx.updateHeader();}},
 onCursor:function(key,c){if(Ctx&&Ctx.engine)Ctx.engine.remoteCursor(key,c);},
-onCursorGone:function(key){if(Ctx&&Ctx.engine)Ctx.engine.dropCursor(key);},
+onCursorGone:function(key){
+if(Ctx&&Ctx.engine)Ctx.engine.dropCursor(key);
+if(Ctx&&Ctx.presence){Ctx.presence.delete(key);if(Ctx.updateHeader)Ctx.updateHeader();}
+},
 onStatus:function(){if(Ctx&&Ctx.updateHeader)Ctx.updateHeader();}
 });
 }
@@ -1832,7 +2029,7 @@ this.mm=el('canvas',{class:'minimap',width:156,height:106,style:{display:prefs.m
 w.append(this.mm);
 this.mmCtx=this.mm.getContext('2d');
 this.mm.addEventListener('pointerdown',function(e){self.mmDrag=true;try{self.mm.setPointerCapture(e.pointerId);}catch(err){}self.mmMove(e);});
-this.mm.addEventListener('pointermove',function(e){if(self.mmDrag)this.mmMove(e);});
+this.mm.addEventListener('pointermove',function(e){if(self.mmDrag)self.mmMove(e);});
 this.mm.addEventListener('pointerup',function(){self.mmDrag=false;});
 }
 };
@@ -1917,7 +2114,7 @@ self.applyCam();return;
 if(self.gesture&&self.gesture.type==='node'){self.dragNodeTo(e);return;}
 if(!self.present){
 var now=Date.now();
-if(now-self.lastCursorSend>50){
+if(now-self.lastCursorSend>80){
 self.lastCursorSend=now;
 var wpt=self.screenToWorld(e.clientX-r.left,e.clientY-r.top);
 if(Ctx&&Ctx.sendCur)Ctx.sendCur({x:wpt.x,y:wpt.y,u:{name:self.me.name,emoji:self.me.emoji,color:self.me.color}});
@@ -1928,7 +2125,7 @@ window.addEventListener('pointermove',this._move);
 this._up=function(e){
 self.pointers.delete(e.pointerId);
 clearTimeout(self.touchTimer);
-if(self.gesture&&self.gesture.type==='pinch'){if(self.pointers.size<2)this.gesture=null;return;}
+if(self.gesture&&self.gesture.type==='pinch'){if(self.pointers.size<2)self.gesture=null;return;}
 if(self.touchStart){var tid=self.touchStart.id,ts=self.touchStart.shift;self.touchStart=null;self.tapNode(tid,ts);return;}
 if(self.pendingNode){var pid=self.pendingNode.id,ps=self.pendingNode.shift;self.pendingNode=null;self.tapNode(pid,ps);return;}
 if(self.gesture&&self.gesture.type==='node'){self.finishNodeDrag();return;}
@@ -2761,7 +2958,11 @@ onclick:function(){state.branch=i;renderColors();renderFmt();renderPreview();}})
 }));
 }
 renderFmt();renderType();renderImg();renderColors();renderPreview();
+var modNote=(!editing&&Ctx.role!=='host'&&Ctx.room.meta.moderation)
+?el('div',{class:'note-box'},'🛡️ У кімнаті увімкнено модерацію: після «Додати на мапу» твоя думка з’явиться у всіх, щойно вчитель її схвалить.')
+:null;
 var left=el('div',{style:{display:'flex',flexDirection:'column',gap:'13px',minWidth:'0'}},
+modNote,
 isRoot?null:el('div',{},el('div',{class:'field-label'},'1 · Формат думки'),fmtRow),
 el('div',{},el('div',{class:'field-label'},(isRoot?'1':'2')+' · Текст',counter),ta,
 el('div',{style:{marginTop:'6px'}},emojiStrip)),
@@ -2974,16 +3175,16 @@ var qrc=QR.canvas(ju,232);
 if(qrc)qrBox.append(qrc);
 else qrBox.append(el('p',{style:{color:'#241F3D',fontSize:'12px',maxWidth:'220px',textAlign:'center'}},'QR не вмістив довге посилання — скопіюй його кнопкою нижче.'));
 openModal({title:'🔗 Посилання для учнів',body:el('div',{style:{display:'flex',flexDirection:'column',gap:'14px'}},
-el('div',{class:'note-box'},'Учні сканують QR-код або відкривають посилання на телефоні — і одразу бачать дошку. Кімната живе онлайн, доки ведучий тримає її відкритою.'),
+el('div',{class:'note-box'},'Учні сканують QR-код або відкривають посилання на телефоні — і одразу бачать дошку. Усе синхронізується онлайн між усіма пристроями: ви бачите думки учнів, учні бачать ваші.'),
 el('div',{class:'share-sec'},el('h4',{},'Кімната «'+trunc(r.meta.title,32)+'»'),qrBox,
 el('div',{class:'link-row'},linkInput,el('button',{class:'icon-btn',title:'Копіювати',html:ICON.copy,onclick:function(){copyText(ju,'Посилання скопійовано 🔗');}})),
 el('div',{class:'row'},
 el('button',{class:'btn primary',onclick:function(){copyText(ju,'Посилання скопійовано 🔗');}},'📋 Скопіювати посилання'),
 el('button',{class:'btn small',onclick:function(){window.open(ju,'_blank');}},'Відкрити вигляд учасника ↗'))),
 el('div',{class:'share-sec'},el('h4',{},'Як це працює'),
-el('p',{},'1 · Учень відкриває посилання, обирає нік та аватар.'),
-el('p',{},'2 · Думки, наліпки й курсори з’являються у всіх наживо.'),
-el('p',{},'3 · Резервна копія дошки: Меню → Експорт JSON.')))});
+el('p',{},'1 · Учень відкриває посилання, вводить ім’я та прізвище.'),
+el('p',{},'2 · Думки, наліпки й курсори з’являються у всіх наживо — на телефонах, планшетах та комп’ютерах.'),
+el('p',{},'3 · Тримайте свою вкладку відкритою під час уроку. Резервна копія: Меню → Експорт JSON.')))});
 }
 /* ===== podium / help / prompt ===== */
 function showPodium(){
@@ -3021,7 +3222,8 @@ var steps=[
 ['Створи кімнату','Обери шаблон під тему уроку — правила класу, булінг, ментальне здоров’я чи власну тему.'],
 ['Додай думку','Кнопка «＋ Нова думка» відкриє конструктор: формат (стікер, картка, хмаринка, капсула), текст, смайлики, картинка, посилання і колір.'],
 ['Роздай посилання','Натисни 🔗 — скопіюй унікальне посилання або покажи QR. Учні відкривають його на телефонах і приєднуються до кімнати.'],
-['Голосуйте наліпками','На етапі «Голосування» клацни думку → 🟡 і обери наліпку: 🔥 круто, ❤️ підтримую, 💡 геніально, ⭐ важливо, 😂 весело. Наліпки можна переклеювати.'],
+['Керуй модерацією','Прямо на смужці етапів видно: «🛡️ Перевіряє вчитель» чи «⚡ Ідеї одразу на дошці». Ведучий перемикає це одним дотиком.'],
+['Голосуйте наліпками','На етапі «Голосування» клацни думку → 🟡 і обери наліпку: 🔥 круто, ❤️ підтримую, 💡 геніально, ⭐ важливо, 😂 весело.'],
 ['Збережи результат','PNG-плакат, SVG, JSON або конспект Markdown. Кімната чекає на наступний урок.']];
 var hk=[['N / Tab','Нова думка (конструктор)'],['Enter','Сусідня думка'],['Подвійний клік','Редагувати вузол / нова думка на полотні'],
 ['F2','Швидке редагування тексту'],['Ctrl+Enter','Зберегти в конструкторі'],['Del','Видалити вузол'],['Shift + клік','Множинний вибір'],
@@ -3032,13 +3234,13 @@ el('div',{class:'help-steps'},steps.map(function(s,i){
 return el('div',{class:'help-step'},el('div',{class:'n'},String(i+1)),el('b',{},s[0]),el('p',{},s[1]));
 })),
 el('div',{class:'panel-card'},el('h4',{},'🌐 Як працює кімната'),
-el('p',{style:{fontSize:'13px'}},'Кімната з’єднує пристрої напряму через інтернет (P2P). Ведучий тримає вкладку відкритою — учні бачать дошку наживо.'),
+el('p',{style:{fontSize:'13px'}},'Кімната синхронізується через інтернет у реальному часі — працює на телефонах, планшетах і комп’ютерах, у шкільному Wi-Fi та мобільному інтернеті.'),
 el('p',{style:{fontSize:'13px',marginTop:'6px'}},'Якщо зв’язок перерветься, застосунок сам перепід’єднається. Усі думки зберігаються у браузері ведучого.')),
 el('div',{class:'panel-card'},el('h4',{},'🗳️ Про наліпки'),
-el('p',{style:{fontSize:'13px'}},'Кожен учасник отримує 5 наліпок (ведучий може змінити 1–10). Наліпки різних типів показують настрій класу: вогник — драйв, серце — підтримка, лампочка — геніальність, зірка — важливість, сміх — радість. Режим «🔥 Тепло» підсвічує думки, що набирають голоси.')),
+el('p',{style:{fontSize:'13px'}},'Кожен учасник отримує 5 наліпок (ведучий може змінити 1–10). Наліпки різних типів показують настрій класу. Режим «🔥 Тепло» підсвічує думки, що набирають голоси.')),
 el('div',{class:'panel-card'},el('h4',{},'⌨️ Гарячі клавіші'),
 el('div',{class:'hotkeys'},hk.map(function(p){return [el('kbd',{},p[0]),el('span',{},p[1])];}))),
-el('div',{class:'note-box'},'🔐 Порада для учнів: вигадуйте ніки, не пишіть справжні прізвища. Усе зберігається локально; жодного трекінгу.'),
+el('div',{class:'note-box'},'🔐 Учні вводять справжні ім’я та прізвище — так учитель бачить авторів ідей. Дані кімнати доступні лише тим, хто має посилання.'),
 el('p',{class:'muted',style:{fontSize:'12px',textAlign:'center'}},'Інтерактивний застосунок «МАПА ДУМОК» · Автор: Ірина ТЕСЛЕНОК'))});
 }
 function openPromptCard(){
@@ -3096,7 +3298,7 @@ openModal({title:'Назва кімнати',body:inp,actions:[
 el('button',{class:'btn ghost',onclick:closeModal},'Скасувати'),
 el('button',{class:'btn primary',onclick:function(){A.rename(inp.value);closeModal();}},'Зберегти')]});
 }},room.meta.title);
-var statusChip=el('button',{class:'chip info',title:'Стан з’єднання',onclick:function(){openStatusInfo();}});
+var statusChip=el('button',{class:'chip info st-chip',title:'Стан онлайн-з’єднання',onclick:function(){openStatusInfo();}});
 var avatarsBox=el('div',{class:'avatars'});
 var ballotChip=el('span',{class:'chip ballot-chip',style:{display:'none'},title:'Твої наліпки, що лишилися'});
 var soundBtn=el('button',{class:'icon-btn'+(Sound.on?' on':''),'aria-label':'Звук',
@@ -3125,15 +3327,27 @@ el('span',{class:'spacer'}),
 present?null:el('button',{class:'icon-btn hide-m',title:'Пошук (/)',html:ICON.search,onclick:function(){toggleSearch();}}),
 present?null:addBtn,
 present?null:panelBtn,
-present?null:el('button',{class:'icon-btn','aria-label':'Посилання для учнів',title:'Посилання для учнів / QR',html:ICON.share,onclick:function(){openShareModal();}}),
+present?null:el('button',{class:'icon-btn hide-m','aria-label':'Посилання для учнів',title:'Посилання для учнів / QR',html:ICON.share,onclick:function(){openShareModal();}}),
 soundBtn,
 present?null:el('button',{class:'icon-btn','aria-label':'Меню',title:'Меню кімнати',html:ICON.menu,onclick:function(){openRoomMenu();}}));
 add(root,topbar);
+/* phasebar + статус збору ідей та модерації */
 var phasebar=el('div',{class:'phasebar'});
 var phaseBtns=PHASES.map(function(p){
 return el('button',{class:'phase-chip'+(role==='host'?' clickable':''),title:role==='host'?'Перемкнути етап уроку':'Етап уроку',
 onclick:function(){if(role==='host')A.setPhase(p.id);}},p.icon+' '+p.name);
 });
+var collectChip=el('span',{class:'chip info'});
+var modChip=el('button',{class:'chip mod-chip'+(role==='host'?' clickable':''),
+title:role==='host'?'Натисни, щоб увімкнути або вимкнути перевірку ідей учителем':'Чи перевіряє вчитель нові ідеї',
+onclick:function(){
+if(role!=='host')return;
+var on=!room.meta.moderation;
+A.setSetting('moderation',on);
+toast(on?'🛡️ Модерацію увімкнено — нові ідеї учнів чекатимуть на вашу перевірку':'⚡ Модерацію вимкнено — ідеї учнів з’являються на дошці одразу',{icon:on?'🛡️':'⚡'});
+}});
+var pendChip=el('button',{class:'chip mag',style:{display:'none'},title:'Ідеї, що чекають на перевірку — відкрити чергу',
+onclick:function(){activeTab='class';syncTabs();openSheet();}});
 var timerRing=svgEl('svg',{class:'ring',viewBox:'0 0 26 26'},
 svgEl('circle',{class:'tr',cx:13,cy:13,r:11}),
 svgEl('circle',{class:'tp',cx:13,cy:13,r:11,'stroke-dasharray':'69.1','stroke-dashoffset':'0'}));
@@ -3141,7 +3355,7 @@ var timerLabel=el('b',{style:{fontSize:'13px'}},'5:00');
 var timerChip=el('button',{class:'chip timer-chip',title:role==='host'?'Керувати таймером':'Таймер етапу',
 onclick:function(){if(role==='host')openTimerModal();}},timerRing,timerLabel);
 var promptBtn=el('button',{class:'chip lime',title:'Випадкове питання для розгону ідей',onclick:function(){openPromptCard();}},'💡 Підказка');
-add(phasebar,phaseBtns,promptBtn,timerChip);
+add(phasebar,phaseBtns,collectChip,modChip,pendChip,promptBtn,timerChip);
 if(!present)add(root,phasebar);
 if(!present&&!LS.get('hintDismissed2')){
 var hintbar=el('div',{class:'hintbar'},
@@ -3328,25 +3542,7 @@ if(!present){
 emptyCta=el('div',{class:'empty-cta'});
 add(wrap,emptyCta);
 Ctx.updateEmpty=function(){
-var count=engine.visible.filter(function(n){return n.id!=='root';}).length;
-if(count>0){emptyCta.style.display='none';return;}
-emptyCta.style.display='none';return;
-if(role==='guest'&&P2P.status!=='on'){
-fill(emptyCta,el('div',{class:'card'},
-el('div',{class:'big'},'🔌'),
-el('h3',{},'Під’єднуємось до ведучого…'),
-el('p',{},'Переконайся, що ведучий відкрив цю кімнату. Щойно з’єднаємось — усі думки з’являться тут.'),
-el('button',{class:'btn small',onclick:function(){P2P.detach();attachP2P();}},'🔄 Спробувати ще раз')));
-return;
-}
-fill(emptyCta,el('div',{class:'card'},
-el('div',{class:'big'},'🧠'),
-el('h3',{},'Додайте першу думку'),
-canAdd()
-?el('p',{},'Оберіть формат — стікер, картку, хмаринку чи капсулу. Додайте текст, смайлики, картинку або посилання.')
-:el('p',{},'Поки що порожньо. Ведучий відкриє дошку для ідей.'),
-canAdd()?el('button',{class:'btn primary',style:{minHeight:'46px'},onclick:function(){openComposer({parentId:'root'});}},'＋ Нова думка'):null,
-canAdd()?el('button',{class:'btn small ghost',onclick:function(){openPromptCard();}},'💡 Картка-підказка'):null));
+emptyCta.style.display='none';
 };
 }
 var bulkBar=null;
@@ -3534,14 +3730,16 @@ toast('Вигляд «'+name+'» збережено 💾',{icon:'💾'});
 }
 function updateHeader(){
 titleBtn.textContent=room.meta.title;
-var tabs=Array.from(Ctx.presence.values()).filter(function(p){return Date.now()-p.last<9000;});
+var tabs=Array.from(Ctx.presence.values()).filter(function(p){return Date.now()-p.last<12000;});
 var online=P2P.status==='on'&&P2P.roomId===id;
-var cls='chip',txt='';
-if(online){cls+=' ok';txt='🟢 Онлайн • '+(P2P.count()+tabs.length+1);}
-else if(P2P.status==='error'){cls+=' warn';txt='🟠 Немає зв’язку — повтор…';}
-else{cls+=' info';txt='🔄 Під’єднання…';}
+var total=P2P.count()+tabs.length+1;
+var cls='chip st-chip',txt='';
+if(online){cls+=' ok';txt='🟢 '+total;}
+else if(P2P.status==='error'){cls+=' warn';txt='🟠 Офлайн';}
+else{cls+=' info';txt='🔄 З’єднання…';}
 statusChip.className=cls;
 statusChip.textContent=txt;
+statusChip.title=online?('Онлайн · учасників: '+total+' · натисни для деталей'):'Стан онлайн-з’єднання — натисни для деталей';
 var uniq=new Map();
 uniq.set(me.id,me);
 tabs.forEach(function(p){uniq.set(p.u.id,p.u);});
@@ -3572,6 +3770,29 @@ timerRing.querySelector('.tp').style.stroke=(left<=30&&t.run)?'var(--bad)':'var(
 var lastPhase=room.meta.phase;
 function updatePhasebar(){
 phaseBtns.forEach(function(b,i){b.classList.toggle('active',PHASES[i].id===room.meta.phase);});
+var ph=room.meta.phase;
+collectChip.textContent=ph==='collect'?'💡 Збираються ідеї':ph==='discuss'?'💬 Обговорюємо ідеї':ph==='vote'?'🗳️ Триває голосування':'🏁 Підсумки уроку';
+collectChip.className='chip info';
+if(ph==='collect'||ph==='discuss'){
+modChip.style.display='';
+if(room.meta.moderation){
+modChip.className='chip warn mod-chip'+(role==='host'?' clickable':'');
+modChip.textContent='🛡️ Перевіряє вчитель';
+}else{
+modChip.className='chip ok mod-chip'+(role==='host'?' clickable':'');
+modChip.textContent='⚡ Ідеї одразу на дошці';
+}
+modChip.style.cursor=role==='host'?'pointer':'default';
+}else modChip.style.display='none';
+var pending=Object.keys(room.nodes).filter(function(k){var n=room.nodes[k];return !n.del&&n.status==='pending';});
+if(role==='host'&&pending.length>0&&(ph==='collect'||ph==='discuss')){
+pendChip.style.display='';
+pendChip.textContent='⏳ '+pending.length+' на перевірці';
+}else if(role!=='host'){
+var minePending=pending.filter(function(n){return n.author.id===me.id;}).length;
+if(minePending>0){pendChip.style.display='';pendChip.textContent='⏳ Твоїх на перевірці: '+minePending;pendChip.style.cursor='default';}
+else pendChip.style.display='none';
+}else pendChip.style.display='none';
 updateTimerChip();
 if(!present&&room.meta.phase!==lastPhase){
 if(room.meta.phase==='vote'){
@@ -3607,6 +3828,7 @@ var ideas=Object.keys(room.nodes).filter(function(k){var x=room.nodes[k];return 
 return [
 el('div',{class:'panel-card'},el('h4',{},'Кімната'),
 el('div',{class:'kv'},el('span',{},'Етап'),el('b',{},phaseName(room.meta.phase))),
+el('div',{class:'kv'},el('span',{},'Модерація'),el('b',{style:{color:room.meta.moderation?'var(--warn)':'var(--ok)'}},room.meta.moderation?'🛡️ перевіряє вчитель':'⚡ вимкнена')),
 el('div',{class:'kv'},el('span',{},'Думок'),el('b',{},String(ideas))),
 el('div',{class:'kv'},el('span',{},'Наліпок'),el('b',{},String(Array.from(totals.values()).reduce(function(s,v){return s+v;},0)))),
 el('div',{class:'kv'},el('span',{},'Раунд'),el('b',{},String(room.meta.vote.round)))),
@@ -3630,7 +3852,7 @@ el('h4',{},n.id==='root'?'Центральна тема':'Думка · '+fmtNam
 el('div',{class:'row',style:{marginBottom:'8px'}},
 el('span',{class:'chip'},n.author.emoji+' '+n.author.name),
 el('span',{class:'muted',style:{fontSize:'11.5px'}},fmtTime(n.ts)),
-n.status==='pending'?el('span',{class:'chip warn'},'⏳ очікує'):null,
+n.status==='pending'?el('span',{class:'chip warn'},'⏳ очікує перевірки'):null,
 n.status==='hidden'?el('span',{class:'chip'},'🙈 приховано'):null,
 n.pin?el('span',{class:'chip mag'},'📌 закріплено'):null),
 n.img?el('img',{class:'panel-img',src:n.img,alt:'Картинка думки'}):null,
@@ -3706,7 +3928,7 @@ el('button',{class:'btn small',onclick:function(){A.toggleHidden(n.id);}},'👁�
 }
 var people=new Map();
 people.set(me.id,{u:me,online:true});
-Ctx.presence.forEach(function(p){if(Date.now()-p.last<9000)people.set(p.u.id,{u:p.u,online:true});});
+Ctx.presence.forEach(function(p){if(Date.now()-p.last<12000)people.set(p.u.id,{u:p.u,online:true});});
 Object.keys(room.nodes).forEach(function(k){
 var n=room.nodes[k];
 if(!n.del&&!people.has(n.author.id))people.set(n.author.id,{u:n.author,online:false});
@@ -3784,6 +4006,7 @@ if(!n)return;
 var b=room.ballots[me.id],mine=(b&&b.votes[nid])||{};
 openModal({title:n.emoji+' '+trunc(engine.displayedText(n)||'(картинка)',40),sheet:true,body:el('div',{class:'menu-list'},
 n.img?el('img',{class:'panel-img',src:n.img,alt:'Картинка думки'}):null,
+n.status==='pending'?el('div',{class:'note-box'},'⏳ Ця думка чекає на перевірку вчителя. Щойно він її схвалить — вона з’явиться у всіх.'):null,
 canEditNode(n)?el('button',{class:'btn',onclick:function(){closeModal();openComposer({nodeId:nid});}},'🎨 Редагувати (формат, картинка, посилання)'):null,
 (canAdd()&&nid!=='root')?el('button',{class:'btn',onclick:function(){closeModal();openComposer({parentId:nid});}},'＋ Дочірня думка'):null,
 (canVote()&&nid!=='root'&&n.status==='ok')?el('div',{},
@@ -3800,6 +4023,7 @@ var key=nid+'|'+e+'|'+me.id,on=room.reacts[key]&&room.reacts[key].on;
 return el('button',{class:on?'sel':'',onclick:function(){A.react(nid,e);closeModal();}},e);
 })):null,
 (role==='host'&&n.status==='pending')?el('button',{class:'btn primary',onclick:function(){A.approve(nid);closeModal();}},'✅ Схвалити'):null,
+(role==='host'&&n.status==='pending')?el('button',{class:'btn danger',onclick:function(){A.reject(nid);closeModal();}},'🚫 Відхилити'):null,
 role==='host'?el('button',{class:'btn',onclick:function(){A.togglePin(nid);closeModal();}},n.pin?'📌 Відкріпити':'📌 Закріпити'):null,
 el('button',{class:'btn',onclick:function(){closeModal();activeTab='node';syncTabs();openSheet();}},'ℹ️ Деталі думки'),
 canDeleteNode(n)?el('button',{class:'btn danger',onclick:function(){closeModal();A.deleteNode(nid);}},'🗑️ Видалити'):null)});
@@ -3807,6 +4031,12 @@ canDeleteNode(n)?el('button',{class:'btn danger',onclick:function(){closeModal()
 function openRoomMenu(){
 openModal({title:'Меню кімнати',sheet:isMobile(),body:el('div',{class:'menu-list'},
 el('button',{class:'btn',onclick:function(){closeModal();openShareModal();}},'🔗 Посилання для учнів / QR'),
+role==='host'?el('button',{class:'btn',onclick:function(){
+closeModal();
+var on=!room.meta.moderation;
+A.setSetting('moderation',on);
+toast(on?'🛡️ Модерацію увімкнено — ідеї учнів чекатимуть на перевірку':'⚡ Модерацію вимкнено — ідеї з’являються одразу',{icon:on?'🛡️':'⚡'});
+}},room.meta.moderation?'🛡️ Модерація: увімкнена — вимкнути':'⚡ Модерація: вимкнена — увімкнути'):null,
 el('button',{class:'btn',onclick:function(){closeModal();openExportMenu();}},'🖼️ Експорт: PNG, SVG, JSON, конспект'),
 role==='host'?el('button',{class:'btn',onclick:function(){closeModal();$('#import-file').click();}},'📂 Імпорт JSON'):null,
 role==='host'?el('button',{class:'btn',onclick:function(){closeModal();openSettings();}},'⚙️ Налаштування кімнати'):null,
@@ -3834,10 +4064,10 @@ inp.addEventListener('change',function(){A.setSetting(key,inp.checked);});
 return el('label',{class:'switch'},el('span',{},label),inp,el('span',{class:'tk'}));
 }
 openModal({title:'Налаштування кімнати',body:el('div',{},
-sw('🛡️ Модерація нових думок','moderation'),
+sw('🛡️ Модерація: нові ідеї перевіряє вчитель','moderation'),
 sw('🧹 Фільтр небажаної лексики','filter'),
 sw('🔒 Заблокувати дошку для учнів','locked'),
-el('div',{class:'note-box'},'Кімната завжди онлайн: пристрої з’єднуються напряму (P2P). Якщо інтернет зникне — застосунок автоматично перепід’єднається, а зміни збережуться.'),
+el('div',{class:'note-box'},'Кімната працює онлайн: пристрої синхронізуються через інтернет у реальному часі. Якщо зв’язок зникне — застосунок автоматично перепід’єднається, а зміни збережуться. Стан модерації видно всім на смужці етапів.'),
 el('div',{class:'panel-card'},el('h4',{},'🧪 Перевірка продуктивності'),
 el('div',{class:'row'},
 el('button',{class:'btn small',onclick:function(){A.stress();closeModal();}},'+300 тестових вузлів'),
@@ -3894,13 +4124,19 @@ engine.refresh();closeModal();
 }
 function openStatusInfo(){
 var online=P2P.status==='on';
+var total=P2P.count()+1;
 var msg=online
-?'🟢 Онлайн: пристрої з’єднані напряму. Нові думки, наліпки та курсори видно всім у реальному часі.'
+?'🟢 Онлайн! Учасників у кімнаті: '+total+'. Нові думки, наліпки та курсори видно всім у реальному часі — на телефонах, планшетах і комп’ютерах.'
 :(P2P.status==='error'
-?'🟠 Немає зв’язку. Перевір інтернет — застосунок повторює спробу автоматично кожні 12 секунд.'
-:'🔄 Під’єднуємось до кімнати… Зачекай кілька секунд.');
+?'🟠 Немає зв’язку з сервером синхронізації. Перевір інтернет — застосунок повторює спробу автоматично. Усі твої зміни збережені.'
+:'🔄 Під’єднуємось до кімнати… Зазвичай це займає 2–5 секунд.');
 openModal({title:'Стан з’єднання',body:el('div',{style:{display:'flex',flexDirection:'column',gap:'14px'}},
 el('div',{class:'note-box'},msg),
+online?el('div',{class:'panel-card'},el('h4',{},'Деталі'),
+el('div',{class:'kv'},el('span',{},'Сервер'),el('b',{},P2P.brokerName())),
+el('div',{class:'kv'},el('span',{},'Кімната'),el('b',{},id)),
+el('div',{class:'kv'},el('span',{},'Учасників онлайн'),el('b',{},String(total)))):null,
+el('div',{class:'note-box'},'💡 Усі учасники мають відкрити саме це посилання кімнати. Якщо хтось не бачить дошку — нехай натисне «🔄 Спробувати ще раз» або оновить сторінку.'),
 el('div',{class:'row'},
 (P2P.status!=='on')?el('button',{class:'btn small primary',onclick:function(){P2P.detach();attachP2P();closeModal();}},'🔄 Спробувати ще раз'):null,
 el('button',{class:'btn small',onclick:function(){closeModal();openShareModal();}},'🔗 Посилання та QR')))});
@@ -3945,14 +4181,14 @@ else if(msg.t==='hi'&&msg.u){Ctx.presence.set('tab:'+msg.tab,{u:msg.u,last:Date.
 else if(msg.t==='cur'&&msg.u&&msg.u.id!==me.id)engine.remoteCursor('tab:'+msg.tab+':'+msg.u.id,msg);
 });
 Ctx.bus=bus;
-Ctx.sendCur=throttle(function(c){bus.post(Object.assign({t:'cur'},c));P2P.sendCur(c);},50);
+Ctx.sendCur=throttle(function(c){bus.post(Object.assign({t:'cur'},c));P2P.sendCur(c);},80);
 function hi(){bus.post({t:'hi',u:me});P2P.sendHi(me);}
 hi();
 var hiInt=setInterval(function(){
 if(!Ctx)return;
 hi();
 var now=Date.now();
-Ctx.presence.forEach(function(p,k){if(k.indexOf('tab:')===0&&now-p.last>9000)Ctx.presence.delete(k);});
+Ctx.presence.forEach(function(p,k){if(now-p.last>12000)Ctx.presence.delete(k);});
 updateHeader();
 },3000);
 var pollInt=setInterval(onRemoteSignal,1000);
@@ -4071,7 +4307,7 @@ app.replaceChildren();
 var emojis=['🦊','🐼','🦄','🐸','🐙','🦁','🐯','🐨','🦉','🐬','🦋','🐝'];
 var selEmoji=emojis[Math.floor(Math.random()*emojis.length)];
 var selColor=branchColor(Math.floor(Math.random()*8));
-var nick=el('input',{placeholder:'Твій нік (напр. «Зоряний Їжак»)',maxlength:24,'aria-label':'Нік'});
+var nick=el('input',{placeholder:'Напр., Марія Коваленко',maxlength:24,'aria-label':'Ім’я та прізвище',autocomplete:'name'});
 var emojiBox=el('div',{class:'emoji-grid'},emojis.map(function(e){
 return el('button',{class:e===selEmoji?'sel':'',onclick:function(ev){
 selEmoji=e;
@@ -4088,7 +4324,7 @@ $$('button',colorBox).forEach(function(b){b.classList.toggle('sel',b===ev.curren
 }));
 function enter(){
 var name=nick.value.trim();
-if(name.length<2){toast('Нік має бути від 2 символів 🙂',{icon:'✍️'});nick.focus();return;}
+if(name.length<2){toast('Вкажи ім’я та прізвище (від 2 символів) 🙂',{icon:'✍️'});nick.focus();return;}
 var me={id:uid(),name:trunc(name,24),emoji:selEmoji,color:selColor,role:'guest'};
 LS.set('me.'+id,me);
 room.events.push({id:uid(),ts:Date.now(),icon:'👋',text:me.name+' приєднується до кімнати'});
@@ -4104,11 +4340,11 @@ el('div',{class:'row'},el('span',{class:'logo'},el('span',{class:'orb'},'🧠'),
 el('h1',{},room.meta.title),
 el('div',{class:'row'},
 el('span',{class:'chip info'},phaseName(room.meta.phase)),
-el('span',{class:'chip'},Object.keys(room.nodes).filter(function(k){var n=room.nodes[k];return !n.del&&n.id!=='root';}).length+' думок')),
+el('span',{class:'chip'+(room.meta.moderation?' warn':' ok')},room.meta.moderation?'🛡️ Ідеї перевіряє вчитель':'⚡ Ідеї одразу на дошці')),
 el('div',{},el('label',{style:{fontSize:'13px',fontWeight:'700',display:'block',marginBottom:'6px'}},'Обери аватар'),emojiBox),
 el('div',{},el('label',{style:{fontSize:'13px',fontWeight:'700',display:'block',marginBottom:'6px'}},'Твій колір'),colorBox),
-el('div',{},el('label',{style:{fontSize:'13px',fontWeight:'700',display:'block',marginBottom:'6px'}},'Нік'),nick),
-el('div',{class:'hint'},'🔐 Не вигадуй нік — пиши справжнє прізвище. Дані залишаються на пристрої; жодного трекінгу.'),
+el('div',{},el('label',{style:{fontSize:'13px',fontWeight:'700',display:'block',marginBottom:'6px'}},'Ім’я та прізвище'),nick),
+el('div',{class:'hint'},'✍️ Пиши справжнє ім’я та прізвище — так учитель бачить авторів ідей. Дані кімнати доступні лише тим, хто має посилання.'),
 el('button',{class:'btn primary',style:{minHeight:'46px'},onclick:enter},'Увійти до кімнати →'),
 el('p',{class:'muted',style:{fontSize:'11.5px',textAlign:'center'}},'Автор: Ірина ТЕСЛЕНОК'))));
 setTimeout(function(){nick.focus();},80);
@@ -4313,7 +4549,8 @@ var modInp=el('input',{type:'checkbox'});
 openModal({title:'Нова кімната',wide:true,body:el('div',{},
 el('div',{class:'ctl'},el('label',{},'Назва / центральна тема'),titleInp),
 el('div',{class:'ctl'},el('label',{},'Шаблон уроку'),grid),
-el('label',{class:'switch'},el('span',{},'🛡️ Модерація нових думок учнів'),modInp,el('span',{class:'tk'}))),
+el('label',{class:'switch'},el('span',{},'🛡️ Модерація: нові ідеї учнів перевіряє вчитель'),modInp,el('span',{class:'tk'})),
+el('div',{class:'note-box'},'Стан модерації буде видно всім на смужці етапів — і ви зможете перемикати його одним дотиком прямо під час уроку.')),
 actions:[el('button',{class:'btn ghost',onclick:closeModal},'Скасувати'),
 el('button',{class:'btn primary',onclick:function(){
 var title=trunc(titleInp.value.trim()||TEMPLATES[selTpl].root,60);
